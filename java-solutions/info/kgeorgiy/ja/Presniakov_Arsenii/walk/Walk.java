@@ -1,8 +1,13 @@
 package info.kgeorgiy.ja.Presniakov_Arsenii.walk;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 
 public class Walk {
     static final String invalidHash = "00000000";
@@ -43,7 +48,7 @@ public class Walk {
     public static void main(String[] args) {
 
         if (args == null || args.length != 2 || args[0] == null || args[1] == null) {
-            System.err.printf("Error! Args is invalid");
+            System.err.print("Error! Args is invalid");
             return;
         }
 
@@ -71,9 +76,7 @@ public class Walk {
             return;
         }
 
-        try (
-                BufferedReader reader = Files.newBufferedReader(inputfile, StandardCharsets.UTF_8);
-        ) {
+        try (BufferedReader reader = Files.newBufferedReader(inputfile, StandardCharsets.UTF_8)) {
             try (BufferedWriter writer = Files.newBufferedWriter(outputfile, StandardCharsets.UTF_8)) {
                 String stringFile;
                 while ((stringFile = reader.readLine()) != null) {
@@ -82,7 +85,6 @@ public class Walk {
             } catch (IOException e) {
                 System.err.printf("IOException in main writer: " + e.getLocalizedMessage());
             }
-
         } catch (IOException e) {
             System.err.printf("IOException in main reader: " + e.getLocalizedMessage());
         }
