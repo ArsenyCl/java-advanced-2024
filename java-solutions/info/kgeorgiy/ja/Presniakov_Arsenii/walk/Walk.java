@@ -72,12 +72,20 @@ public class Walk {
         }
 
         try (
-                BufferedReader reader = Files.newBufferedReader(inputfile, StandardCharsets.UTF_8);
+                BufferedReader reader = Files.newBufferedReader(inputfile, StandardCharsets.UTF_8)
         ) {
             try (BufferedWriter writer = Files.newBufferedWriter(outputfile, StandardCharsets.UTF_8)) {
                 String stringFile;
-                while ((stringFile = reader.readLine()) != null) {
-                    writer.write(readAndGetHash(stringFile) + " " + stringFile + System.lineSeparator());
+                try {
+                    while ((stringFile = reader.readLine()) != null) {
+                        try {
+                            writer.write(readAndGetHash(stringFile) + " " + stringFile + System.lineSeparator());
+                        } catch (IOException e) {
+                            System.err.println("IOException in write" + e.getLocalizedMessage());
+                        }
+                    }
+                } catch (IOException e) {
+                    System.err.println("IOException in read" + e.getLocalizedMessage());
                 }
             } catch (IOException e) {
                 System.err.printf("IOException in main writer: " + e.getLocalizedMessage());
