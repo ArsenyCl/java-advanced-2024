@@ -38,8 +38,15 @@ public class Walk {
     }
 
     public static void main(String[] args) {
+
+        if (args == null || args.length != 2 || args[0] == null || args[1] == null) {
+            System.err.printf("Error! Args is invalid");
+            return;
+        }
+
         File inputfile;
         File outputfile;
+
 
         try {
             inputfile = new File(args[0]);
@@ -66,8 +73,6 @@ public class Walk {
             }
         } catch (IOException e) {
             System.err.printf("IOException in main: " + e.getLocalizedMessage());
-        } catch (RuntimeException e) {
-            System.err.printf("RuntimeException in main: " + e.getLocalizedMessage());
         }
     }
 }
