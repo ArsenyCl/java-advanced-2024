@@ -1,4 +1,4 @@
-package info.kgeorgiy.ja.Presniakov_Arsenii;
+package info.kgeorgiy.ja.Presniakov_Arsenii.walk;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
