@@ -2,7 +2,7 @@ package info.kgeorgiy.ja.Presniakov_Arsenii.arrayset;
 
 import java.util.*;
 
-public class ArraySet<E extends Comparable<E>> extends AbstractSet<E> implements SortedSet<E> {
+public class ArraySet<E> extends AbstractSet<E> implements SortedSet<E> {
     public ArraySet() {
         this.elements = Collections.unmodifiableList(new ArrayList<>());
         this.comparator = null;
@@ -39,9 +39,12 @@ public class ArraySet<E extends Comparable<E>> extends AbstractSet<E> implements
         return comparator;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public SortedSet<E> subSet(E fromElement, E toElement) {
-        if (comparator == null ? fromElement.compareTo(toElement) > 0 : comparator.compare(fromElement, toElement) > 0)
+        if (comparator == null
+                ? ((Comparator<E>) Comparator.naturalOrder()).compare(fromElement, toElement) > 0
+                : comparator.compare(fromElement, toElement) > 0)
             throw new IllegalArgumentException();
 
         return subSetIndex(upperbound(fromElement), upperbound(toElement));
