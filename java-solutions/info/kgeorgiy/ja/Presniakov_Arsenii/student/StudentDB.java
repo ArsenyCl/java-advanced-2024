@@ -5,6 +5,7 @@ import info.kgeorgiy.java.advanced.student.Student;
 import info.kgeorgiy.java.advanced.student.StudentQuery;
 
 import java.util.*;
+import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -40,7 +41,7 @@ public class StudentDB implements StudentQuery {
 
     @Override
     public String getMaxStudentFirstName(List<Student> students) {
-        return sortStudentsById(students).get(students.size() - 1).getFirstName();
+        return students.stream().max(Student::compareTo).map(Student::getFirstName).orElse("");
     }
 
     @Override
@@ -50,7 +51,7 @@ public class StudentDB implements StudentQuery {
 
     @Override
     public List<Student> sortStudentsByName(Collection<Student> students) {
-        return sortBy(students, Comparator.comparing(Student::getFirstName).thenComparing(Student::getLastName));
+        return sortBy(students, mainComparator);
     }
 
     @Override
@@ -70,7 +71,13 @@ public class StudentDB implements StudentQuery {
 
     @Override
     public Map<String, String> findStudentNamesByGroup(Collection<Student> students, GroupName group) {
-        return students.stream().filter(each -> group.equals(each.getGroup())).collect(Collectors.toMap(Student::getLastName, Student::getFirstName));
+        return students.stream().
+                filter(each -> group.equals(each.getGroup())).
+                collect(Collectors.toMap(
+                        Student::getLastName,
+                        Student::getFirstName,
+                        BinaryOperator.minBy(String::compareTo)
+                ));
     }
 
     private <E> List<E> getType(List<Student> students, Function<Student, E> supplier) {
@@ -81,6 +88,12 @@ public class StudentDB implements StudentQuery {
         return students.stream().sorted(comparator).toList();
     }
     private List<Student> filterBy(Collection<Student> students, Predicate<Student> pred) {
-        return students.stream().filter(pred).toList();
+        return students.stream().filter(pred).sorted(mainComparator).toList();
     }
+
+    static private final Comparator<Student> mainComparator =
+            Comparator.
+            comparing(Student::getLastName).
+                    thenComparing(Student::getFirstName).
+                    thenComparing(Student::getId, Comparator.reverseOrder());
 }
