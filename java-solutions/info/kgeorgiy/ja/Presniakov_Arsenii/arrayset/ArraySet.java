@@ -56,26 +56,25 @@ public class ArraySet<E> extends AbstractSet<E> implements SortedSet<E> {
     @SuppressWarnings("unchecked")
     @Override
     public SortedSet<E> subSet(E fromElement, E toElement) {
-        // :NOTE: ternary operator in if
-        if (comparator == null
-                ? ((Comparator<E>) Comparator.naturalOrder()).compare(fromElement, toElement) > 0
-                : comparator.compare(fromElement, toElement) > 0)
-        // :TO-IMPROVE: message
+
+        if (privateComparator(fromElement, toElement))
         {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("fromElement > toElement");
         }
 
-        return subSetIndex(upperBound(fromElement), upperBound(toElement));
+        return subSetIndex(lowerBound(fromElement), lowerBound(toElement));
     }
+
+
 
     @Override
     public SortedSet<E> headSet(E toElement) {
-        return subSetIndex(0, upperBound(toElement));
+        return subSetIndex(0, lowerBound(toElement));
     }
 
     @Override
     public SortedSet<E> tailSet(E fromElement) {
-        return subSetIndex(upperBound(fromElement), size());
+        return subSetIndex(lowerBound(fromElement), size());
     }
 
     @Override
@@ -108,7 +107,7 @@ public class ArraySet<E> extends AbstractSet<E> implements SortedSet<E> {
 
     // :TO-IMPROVE: naming
     // :NOTE: ambigous naming
-    private int upperBound(E element) {
+    private int lowerBound(E element) {
         int index = Collections.binarySearch(elements, Objects.requireNonNull(element), comparator);
         if (index < 0) {
             return -(index + 1);
@@ -119,5 +118,12 @@ public class ArraySet<E> extends AbstractSet<E> implements SortedSet<E> {
 
     private SortedSet<E> subSetIndex(int begin, int end) {
         return new ArraySet<>(elements.subList(begin, end), comparator());
+    }
+
+    @SuppressWarnings("unchecked")
+    private boolean privateComparator(E fromElement, E toElement) {
+        return comparator == null
+                ? ((Comparator<E>) Comparator.naturalOrder()).compare(fromElement, toElement) > 0
+                : comparator.compare(fromElement, toElement) > 0;
     }
 }

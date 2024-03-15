@@ -33,11 +33,7 @@ public class StudentDB implements StudentQuery {
 
     @Override
     public Set<String> getDistinctFirstNames(List<Student> students) {
-        return students.
-                stream().
-                map(Student::getFirstName).
-                collect(Collectors.toCollection(TreeSet::new));
-        // :NOTE: try use getType
+        return new TreeSet<>(getType(students, Student::getFirstName));
     }
 
     @Override
