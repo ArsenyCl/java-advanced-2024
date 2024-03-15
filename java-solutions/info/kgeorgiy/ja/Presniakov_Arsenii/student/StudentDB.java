@@ -37,6 +37,7 @@ public class StudentDB implements StudentQuery {
                 stream().
                 map(Student::getFirstName).
                 collect(Collectors.toCollection(TreeSet::new));
+        // :NOTE: try use getType
     }
 
     @Override
@@ -46,12 +47,12 @@ public class StudentDB implements StudentQuery {
 
     @Override
     public List<Student> sortStudentsById(Collection<Student> students) {
-        return sortBy(students, Comparator.comparingInt(Student::getId));
+        return sortBy(students, Comparator.naturalOrder());
     }
 
     @Override
     public List<Student> sortStudentsByName(Collection<Student> students) {
-        return sortBy(students, mainComparator);
+        return sortBy(students, MAIN_COMPARATOR);
     }
 
     @Override
@@ -88,12 +89,12 @@ public class StudentDB implements StudentQuery {
         return students.stream().sorted(comparator).toList();
     }
     private List<Student> filterBy(Collection<Student> students, Predicate<Student> pred) {
-        return students.stream().filter(pred).sorted(mainComparator).toList();
+        return students.stream().filter(pred).sorted(MAIN_COMPARATOR).toList();
     }
 
-    static private final Comparator<Student> mainComparator =
+    private static final Comparator<Student> MAIN_COMPARATOR =
             Comparator.
             comparing(Student::getLastName).
                     thenComparing(Student::getFirstName).
-                    thenComparing(Student::getId, Comparator.reverseOrder());
+                    thenComparing(Comparator.reverseOrder());
 }
