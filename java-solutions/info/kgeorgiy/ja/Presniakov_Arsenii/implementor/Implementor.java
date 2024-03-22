@@ -19,10 +19,13 @@ public class Implementor implements Impler {
             throw new ImplerException("Class<?> is not a reflection of an interface!");
         }
 
+        if (Modifier.isPrivate(token.getModifiers())) {
+            throw new ImplerException("Interface is private!");
+        }
+
         try (Writer writer = Files.newBufferedWriter(getFilePath(token, root))) {
             writer.write(packageStatement(token));
             writer.write(classSignature(token) + " {" + System.lineSeparator());
-
             for(Method method : token.getMethods()) {
                 writer.write(methodSignature(method));
             }
@@ -62,7 +65,7 @@ public class Implementor implements Impler {
     }
 
     private String classModifiers(Class<?> token) {
-            return Modifier.toString(token.getModifiers() &  ~Modifier.ABSTRACT & ~Modifier.INTERFACE);
+            return Modifier.toString(token.getModifiers() &  ~Modifier.ABSTRACT & ~Modifier.INTERFACE & ~Modifier.STATIC & ~Modifier.PROTECTED);
     }
     private String methodSignature(Method method) {
         if (Modifier.isStatic(method.getModifiers())) {
@@ -123,8 +126,12 @@ public class Implementor implements Impler {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T> T getDefaultValue(Class<?> token) {
-        return (T) Array.get(Array.newInstance(token, 1), 0);
+    private String getDefaultValue(Class<?> token) {
+        if (token == char.class || token == double.class || token == float.class) {
+            return "0";
+        }
+
+        Object obj = Array.get(Array.newInstance(token, 1), 0);
+        return obj == null ? "null" : obj.toString();
     }
 }
