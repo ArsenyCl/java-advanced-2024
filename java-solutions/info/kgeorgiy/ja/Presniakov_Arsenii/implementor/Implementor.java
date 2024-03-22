@@ -10,7 +10,10 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Implementor implements Impler {
 
@@ -88,21 +91,10 @@ public class Implementor implements Impler {
     }
 
     private String methodArguments(Method method) {
-        StringBuilder sb = new StringBuilder("(");
-
-        for (Parameter parameter : method.getParameters()) {
-            sb.append(parameter.getType().getCanonicalName()).
-                    append(" ").
-                    append(parameter.getName()).
-                    append(", ");
-        }
-        if (sb.length() > 1) {
-            sb.delete(sb.length() - 2, sb.length() - 1);
-        }
-
-        sb.append(")");
-
-        return sb.toString();
+        return  "(" + Arrays.stream(method.getParameters())
+                .map(parameter -> parameter.getType().getCanonicalName()
+                        + " " + parameter.getName()).
+                collect(Collectors.joining(", ")) + ")";
     }
 
     private String methodExceptions(Method method) {
@@ -110,13 +102,8 @@ public class Implementor implements Impler {
         if (exceptions.length == 0) {
             return "";
         }
-        StringBuilder sb = new StringBuilder(" throws ");
-        for (Class<?> exception : exceptions) {
-            sb.append(exception.getCanonicalName()).append(", ");
-        }
-        sb.delete(sb.length() - 2, sb.length() - 1);
 
-        return sb.toString();
+        return " throws " + Arrays.stream(exceptions).map(Class::getCanonicalName).collect(Collectors.joining(", "));
     }
 
     private String methodDefinition(Method method) {
