@@ -7,13 +7,10 @@ import java.io.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Implementor implements Impler {
 
@@ -28,7 +25,9 @@ public class Implementor implements Impler {
         }
 
         try (Writer writer = Files.newBufferedWriter(getFilePath(token, root))) {
-            writer.write(packageStatement(token));
+            if (!token.getPackageName().isEmpty()) {
+                writer.write(packageStatement(token));
+            }
             writer.write(classSignature(token) + " {" + System.lineSeparator());
             for(Method method : token.getMethods()) {
                 writer.write(methodSignature(method));
@@ -103,7 +102,9 @@ public class Implementor implements Impler {
             return "";
         }
 
-        return " throws " + Arrays.stream(exceptions).map(Class::getCanonicalName).collect(Collectors.joining(", "));
+        return " throws " + Arrays.stream(exceptions)
+                .map(Class::getCanonicalName)
+                .collect(Collectors.joining(", "));
     }
 
     private String methodDefinition(Method method) {
