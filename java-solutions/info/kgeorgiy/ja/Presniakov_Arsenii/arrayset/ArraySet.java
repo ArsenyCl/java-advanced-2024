@@ -83,7 +83,7 @@ public class ArraySet<E> extends AbstractSet<E> implements SortedSet<E> {
         if (isEmpty()) {
             throw new NoSuchElementException();
         }
-        return elements.getFirst();
+        return elements.get(0);
     }
 
     @Override

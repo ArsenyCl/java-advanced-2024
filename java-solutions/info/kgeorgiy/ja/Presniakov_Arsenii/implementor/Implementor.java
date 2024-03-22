@@ -127,11 +127,10 @@ public class Implementor implements Impler {
     }
 
     private String getDefaultValue(Class<?> token) {
-        if (token == char.class || token == double.class || token == float.class) {
+        if (token == char.class || token == float.class) {
             return "0";
         }
 
-        Object obj = Array.get(Array.newInstance(token, 1), 0);
-        return obj == null ? "null" : obj.toString();
+        return  String.valueOf(Array.get(Array.newInstance(token, 1), 0));
     }
 }
