@@ -10,6 +10,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 
 public class Implementor implements Impler {
 
@@ -133,4 +134,22 @@ public class Implementor implements Impler {
 
         return  String.valueOf(Array.get(Array.newInstance(token, 1), 0));
     }
+
+    public static void main(String[] args) {
+        if (args == null  || args.length != 2 || args[0] == null || args[1] == null) {
+            System.err.println("Unexpected parameters in args");
+            return;
+        }
+        try {
+            Class<?> token = Class.forName(args[0]);
+            Path root = Path.of(args[1]);
+            new Implementor().implement(token, root);
+        } catch (ImplerException e) {
+            System.err.println("Exception in main: " + e.getMessage());
+        } catch (ClassNotFoundException e) {
+            System.err.println("Class not found: " + e.getMessage());
+        }
+    }
 }
+
+
