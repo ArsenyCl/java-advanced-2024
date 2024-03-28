@@ -1,18 +1,63 @@
 package info.kgeorgiy.ja.Presniakov_Arsenii.implementor;
 
-import info.kgeorgiy.java.advanced.implementor.Impler;
 import info.kgeorgiy.java.advanced.implementor.ImplerException;
+import info.kgeorgiy.java.advanced.implementor.JarImpler;
 
+import javax.tools.JavaCompiler;
+import javax.tools.ToolProvider;
 import java.io.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.jar.*;
 import java.util.stream.Collectors;
 
-public class Implementor implements Impler {
+public class Implementor implements JarImpler {
+    @Override
+    public void implementJar(Class<?> token, Path jarFile) throws ImplerException {
+        Path dir;
+        try {
+            dir = Files.createDirectories(jarFile.getParent());
+        } catch (IOException e) {
+            throw new ImplerException("Unable to create directories in implementJar", e);
+        }
+
+        implement(token, dir);
+        compile(token, dir);
+        createJar(dir, getFilePath(token, "class"), jarFile);
+    }
+
+    private static void createJar(Path root, Path classFile, Path jarFile) throws ImplerException {
+        Manifest manifest = new Manifest();
+        manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
+
+        try (JarOutputStream target = new JarOutputStream(Files.newOutputStream(jarFile), manifest)) {
+            target.putNextEntry(new JarEntry(classFile.toString().replace(File.separator, "/")));
+            Files.copy(root.resolve(classFile), target);
+        } catch (IOException e) {
+            throw new ImplerException("Error while writing to jar in createJar", e);
+        }
+    }
+
+    private static void compile(Class<?> token, Path root) throws ImplerException {
+        final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+
+        final Path classpath;
+
+        try {
+            classpath = Path.of(token.getProtectionDomain().getCodeSource().getLocation().toURI());
+        } catch (URISyntaxException e) {
+            throw new ImplerException("URISyntaxException in compile while creating classpath", e);
+        }
+
+        final String[] args = {"-cp", classpath.toString(), getFullPath(token, root).toString()};
+
+        compiler.run(null, null, null, args);
+    }
 
     @Override
     public void implement(Class<?> token, Path root) throws ImplerException {
@@ -24,7 +69,7 @@ public class Implementor implements Impler {
             throw new ImplerException("Interface is private!");
         }
 
-        try (Writer writer = Files.newBufferedWriter(getFilePath(token, root))) {
+        try (Writer writer = Files.newBufferedWriter(getFullPath(token, root))) {
             if (!token.getPackageName().isEmpty()) {
                 writer.write(packageStatement(token));
             }
@@ -34,43 +79,46 @@ public class Implementor implements Impler {
             }
             writer.write("}" + System.lineSeparator());
         } catch (IOException e) {
-            System.err.println(e.getMessage());
+            throw new ImplerException("IOException in implement", e);
         }
     }
 
-    private Path getFilePath(Class<?> token, Path root) throws IOException {
+    private static Path getFullPath(Class<?> token, Path root) throws ImplerException {
         try {
-            Path path = root.resolve(getPackagePath(token)).resolve(Path.of(implClassName(token) + ".java"));
+            Path path = root.resolve(getFilePath(token, "java"));
             Files.createDirectories(path.getParent());
             return path;
         } catch (IOException e) {
-            System.err.println("Exception thrown in getFilePath: " + e.getMessage());
-            throw e;
+            throw new ImplerException("Unable to create directories in getFullPath");
         }
     }
-    private Path getPackagePath(Class<?> token) {
+
+    private static Path getFilePath(Class<?> token, String Extension)  {
+        return getPackagePath(token).resolve(Path.of(implClassName(token) + "." + Extension));
+    }
+    private static Path getPackagePath(Class<?> token) {
         return Path.of(token.getPackageName().replace('.', File.separatorChar));
     }
 
-    private String packageStatement(Class<?> token) {
+    private static String packageStatement(Class<?> token) {
         return "package " + token.getPackageName() + ";" + System.lineSeparator();
     }
 
-    private String implClassName(Class<?> token) {
+    private static String implClassName(Class<?> token) {
         return token.getSimpleName() + "Impl";
     }
 
-    private String classSignature(Class<?> token) {
+    private static String classSignature(Class<?> token) {
         return  classModifiers(token) +
                 " class " + implClassName(token) +
                  " implements " +
                 token.getCanonicalName();
     }
 
-    private String classModifiers(Class<?> token) {
+    private static String classModifiers(Class<?> token) {
             return Modifier.toString(token.getModifiers() &  ~Modifier.ABSTRACT & ~Modifier.INTERFACE & ~Modifier.STATIC & ~Modifier.PROTECTED);
     }
-    private String methodSignature(Method method) {
+    private static String methodSignature(Method method) {
         if (Modifier.isStatic(method.getModifiers())) {
             return "";
         } else {
@@ -85,18 +133,18 @@ public class Implementor implements Impler {
         }
     }
 
-    private String methodModifiers(Method method) {
+    private static String methodModifiers(Method method) {
         return Modifier.toString(method.getModifiers() & ~Modifier.ABSTRACT & ~Modifier.TRANSIENT);
     }
 
-    private String methodArguments(Method method) {
+    private  static String methodArguments(Method method) {
         return  "(" + Arrays.stream(method.getParameters())
                 .map(parameter -> parameter.getType().getCanonicalName()
                         + " " + parameter.getName()).
                 collect(Collectors.joining(", ")) + ")";
     }
 
-    private String methodExceptions(Method method) {
+    private static String methodExceptions(Method method) {
         Class<?>[] exceptions = method.getExceptionTypes();
         if (exceptions.length == 0) {
             return "";
@@ -107,7 +155,7 @@ public class Implementor implements Impler {
                 .collect(Collectors.joining(", "));
     }
 
-    private String methodDefinition(Method method) {
+    private static String methodDefinition(Method method) {
         if (method.getReturnType() == void.class) {
                 return " {}" + System.lineSeparator();
         } else {
@@ -115,7 +163,7 @@ public class Implementor implements Impler {
         }
     }
 
-    private String getDefaultValue(Class<?> token) {
+    private static String getDefaultValue(Class<?> token) {
         if (token == char.class || token == float.class) {
             return "0";
         }
@@ -131,7 +179,13 @@ public class Implementor implements Impler {
         try {
             Class<?> token = Class.forName(args[0]);
             Path root = Path.of(args[1]);
-            new Implementor().implement(token, root);
+            Implementor implementor =  new Implementor();
+
+            if (args[0].equals("-jar")) {
+                implementor.implementJar(token, root);
+            } else {
+                implementor.implement(token, root);
+            }
         } catch (ImplerException e) {
             System.err.println("Exception in main: " + e.getMessage());
         } catch (ClassNotFoundException e) {
