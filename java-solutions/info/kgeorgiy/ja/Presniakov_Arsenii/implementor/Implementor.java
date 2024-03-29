@@ -30,6 +30,7 @@ public class Implementor implements JarImpler {
      * @param  writer Writer destination.
      * @throws IOException if exception is occurred while writing
      */
+    // :NOTE: camlCase
     void write_utf(String text, Writer writer) throws IOException {
         char[] characters = text.toCharArray();
         StringBuilder sb = new StringBuilder();
