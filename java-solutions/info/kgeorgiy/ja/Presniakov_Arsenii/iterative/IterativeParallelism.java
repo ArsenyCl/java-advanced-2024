@@ -63,10 +63,11 @@ public class IterativeParallelism implements ScalarIP, NewScalarIP {
     private int getIntervalIndex(int size, int pieces, int pieceNum) {
         if (pieceNum == pieces) {
             return size;
+        } else if (pieceNum <= size % pieces) {
+            return (size / pieces + 1) * pieceNum;
         } else {
-            return (size / pieces) * pieceNum;
+            return (size / pieces + 1) * (size % pieces)  + (size / pieces) *  (pieceNum - size % pieces) ;
         }
-
     }
 
     private <T, E> List<E> threadJoiner(int threads, List<? extends T> values, Function<List<? extends T>, E> f) throws InterruptedException {
