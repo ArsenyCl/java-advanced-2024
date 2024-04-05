@@ -1,2 +1,4 @@
 # :NOTE: add clickable JarImpler to javadoc
-javadoc -private -cp ..\..\java-advanced-2024\artifacts\info.kgeorgiy.java.advanced.implementor.jar -d ..\javadoc ..\java-solutions\info\kgeorgiy\ja\Presniakov_Arsenii\implementor\Implementor.java
+javadoc -private -cp ..\..\java-advanced-2024\artifacts\info.kgeorgiy.java.advanced.implementor.jar -d ..\javadoc ..\java-solutions\info\kgeorgiy\ja\Presniakov_Arsenii\implementor\Implementor.java  ../../java-advanced-2024/modules/info.kgeorgiy.java.advanced.implementor/info/kgeorgiy/java/advanced/implementor\Impler.java ../../java-advanced-2024/modules/info.kgeorgiy.java.advanced.implementor/info/kgeorgiy/java/advanced/implementor\JarImpler.java ../../java-advanced-2024/modules/info.kgeorgiy.java.advanced.implementor/info/kgeorgiy/java/advanced/implementor\ImplerException.java
+
+pause

@@ -1,1 +1,1 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"info.kgeorgiy.ja.Presniakov_Arsenii.implementor"}];updateSearchResults();
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"info.kgeorgiy.ja.Presniakov_Arsenii.implementor"},{"l":"info.kgeorgiy.java.advanced.implementor"}];updateSearchResults();
