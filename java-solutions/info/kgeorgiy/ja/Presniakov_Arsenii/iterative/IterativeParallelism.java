@@ -61,6 +61,11 @@ public class IterativeParallelism implements ScalarIP, NewScalarIP {
     }
 
     private int getIntervalIndex(int size, int pieces, int pieceNum) {
+        // size = 95
+        // pieces 10
+        // pieceNum = 9
+        // result = 95
+
         if (pieceNum == pieces) {
             return size;
         } else if (pieceNum <= size % pieces) {
