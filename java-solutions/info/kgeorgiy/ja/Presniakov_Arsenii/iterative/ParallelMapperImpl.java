@@ -31,13 +31,12 @@ public class ParallelMapperImpl implements ParallelMapper {
 
         for (int i = 0; i < args.size(); i++) {
             int finalI = i;
-            tasks.add(() -> {
-                result.set(finalI, f.apply(args.get(finalI)));
-                ready.ready(finalI);
-            });
-
-            synchronized (this) {
-                notify();
+            synchronized(tasks) {
+                tasks.add(() -> {
+                    result.set(finalI, f.apply(args.get(finalI)));
+                    ready.ready(finalI);
+                });
+                tasks.notify();
             }
         }
 
@@ -61,9 +60,9 @@ public class ParallelMapperImpl implements ParallelMapper {
 
     private void runNextTask() throws InterruptedException {
         final Runnable toRun;
-        synchronized(this) {
+        synchronized(tasks) {
             while(tasks.isEmpty()) {
-                wait();
+                tasks.wait();
             }
             toRun = tasks.remove();
         }
