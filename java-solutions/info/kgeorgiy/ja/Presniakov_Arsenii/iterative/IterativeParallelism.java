@@ -2,6 +2,7 @@ package info.kgeorgiy.ja.Presniakov_Arsenii.iterative;
 
 import info.kgeorgiy.java.advanced.iterative.NewScalarIP;
 import info.kgeorgiy.java.advanced.iterative.ScalarIP;
+import info.kgeorgiy.java.advanced.mapper.ParallelMapper;
 
 import java.util.*;
 import java.util.function.Function;
@@ -9,6 +10,16 @@ import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
 public class IterativeParallelism implements ScalarIP, NewScalarIP {
+
+    private final ParallelMapper pm;
+
+    public IterativeParallelism() {
+        pm = null;
+    }
+
+    public IterativeParallelism(ParallelMapper parallelMapper) {
+        pm = parallelMapper;
+    }
 
     @Override
     public <T> T maximum(int threads, List<? extends T> values, Comparator<? super T> comparator, int step) throws InterruptedException {
@@ -61,21 +72,20 @@ public class IterativeParallelism implements ScalarIP, NewScalarIP {
     }
 
     private int getIntervalIndex(int size, int pieces, int pieceNum) {
-        // size = 95
-        // pieces 10
-        // pieceNum = 9
-        // result = 95
-
         if (pieceNum == pieces) {
             return size;
         } else if (pieceNum <= size % pieces) {
             return (size / pieces + 1) * pieceNum;
         } else {
-            return (size / pieces + 1) * (size % pieces)  + (size / pieces) *  (pieceNum - size % pieces) ;
+            return (size / pieces + 1) * (size % pieces) + (size / pieces) * (pieceNum - size % pieces);
         }
     }
 
     private <T, E> List<E> threadJoiner(int threads, List<? extends T> values, Function<List<? extends T>, E> f) throws InterruptedException {
+        if (Objects.nonNull(pm)) {
+            return parallelMapperJoiner(threads, values, f);
+        }
+
         int finalThreads = Math.min(threads, values.size());
 
         if (Objects.isNull(values) || values.isEmpty()) {
@@ -114,6 +124,24 @@ public class IterativeParallelism implements ScalarIP, NewScalarIP {
         }
         return intervalValues;
     }
+
+    private <T, E> List<E> parallelMapperJoiner(int threads, List<? extends T> values, Function<List<? extends T>, E> f) throws InterruptedException {
+
+        final int finalThreads = Math.min(values.size(), threads);
+
+        List<List<? extends T>> splitValues = new ArrayList<>(threads);
+
+        for (int i = 0; i < finalThreads; i++) {
+            splitValues.add(values.subList(
+                    getIntervalIndex(values.size(), finalThreads, i),
+                    getIntervalIndex(values.size(), finalThreads, i+1)
+            ));
+        }
+
+        assert pm != null;
+        return pm.map(f, splitValues);
+    }
+
 
     private static <T> List<T> nth(final List<T> items, final int step) {
         return IntStream.iterate(0, i -> i < items.size(), i -> i + step).mapToObj(items::get).toList();
