@@ -48,6 +48,15 @@ public class ParallelMapperImpl implements ParallelMapper {
     @Override
     public void close() {
         Arrays.stream(threads).forEach(Thread::interrupt);
+        for (Thread thread : threads) {
+            while (true) {
+                try {
+                    thread.join();
+                    break;
+                } catch (InterruptedException ignored) {
+                }
+            }
+        }
     }
 
     private void runThread() {

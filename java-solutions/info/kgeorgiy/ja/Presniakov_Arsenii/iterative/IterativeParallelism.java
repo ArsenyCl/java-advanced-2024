@@ -8,6 +8,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class IterativeParallelism implements ScalarIP, NewScalarIP {
 
@@ -96,32 +97,26 @@ public class IterativeParallelism implements ScalarIP, NewScalarIP {
 
         ArrayList<E> intervalValues = new ArrayList<>(Collections.nCopies(finalThreads, (E) null));
 
-
-        for (int i = 0; i < finalThreads; i++) {
-            int finalI = i;
-
+        IntStream.range(0, finalThreads).forEach(i -> {
             ths[i] = new Thread(() -> {
-                intervalValues.set(finalI, f.apply(
+                intervalValues.set(i, f.apply(
                         values.subList(
-                                getIntervalIndex(values.size(), finalThreads, finalI),
-                                getIntervalIndex(values.size(), finalThreads, finalI + 1))
+                                getIntervalIndex(values.size(), finalThreads, i),
+                                getIntervalIndex(values.size(), finalThreads, i + 1))
                 ));
             });
-        }
+        });
+
+        Arrays.stream(ths).forEach(Thread::start);
 
         for (Thread t : ths) {
-            t.start();
-        }
-
-        for (Thread t : ths) {
-
             try {
                 t.join();
             } catch (InterruptedException e) {
                 throw new InterruptedException("Interrupted exception in minMax");
             }
-
         }
+
         return intervalValues;
     }
 
@@ -131,12 +126,11 @@ public class IterativeParallelism implements ScalarIP, NewScalarIP {
 
         List<List<? extends T>> splitValues = new ArrayList<>(threads);
 
-        for (int i = 0; i < finalThreads; i++) {
+        IntStream.range(0, finalThreads).forEach(i ->
             splitValues.add(values.subList(
                     getIntervalIndex(values.size(), finalThreads, i),
                     getIntervalIndex(values.size(), finalThreads, i+1)
-            ));
-        }
+            )));
 
         assert pm != null;
         return pm.map(f, splitValues);
