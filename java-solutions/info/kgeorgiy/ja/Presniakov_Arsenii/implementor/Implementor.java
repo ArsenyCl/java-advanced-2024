@@ -37,7 +37,7 @@ public class Implementor implements JarImpler {
         for (char each : characters) {
             sb.append(String.format("\\u%04x", (int) each));
         }
-        writer.write(sb.toString());
+        writer.write(text);
     }
 
     /**
