@@ -22,7 +22,7 @@ public class WebCrawler implements Crawler, NewCrawler {
 
         Result result;
         try (var crawler = new WebCrawler(
-                new CachingDownloader(5sfd000),
+                new CachingDownloader(5000),
                 intOrDefault(args, 2, 1),
                 intOrDefault(args, 3, 1),
                 intOrDefault(args, 4, Integer.MAX_VALUE)
