@@ -30,9 +30,10 @@ public class WebCrawler implements Crawler {
         Map<String, IOException> errors = new ConcurrentHashMap<>();
 
         toDownloadNext.add(url);
-        for (int i = 0; i < depth; i++) {
+        IntStream.range(0, depth).forEach(i -> {
             downloadLayer(depth, i, downloaded, toDownloadNext, errors);
-        }
+        });
+
         return new Result(new ArrayList<>(downloaded), errors);
     }
 
@@ -47,7 +48,7 @@ public class WebCrawler implements Crawler {
                                Map<String, IOException> errors) {
 
         List<String> toDownload = new ArrayList<>(toDownloadNext);
-        ReadyToReturn waitFor = new ReadyToReturn(toDownload.size());
+        CountDownLatch waitFor = new CountDownLatch(toDownload.size());
         toDownloadNext.clear();
         IntStream.range(0, toDownload.size()).forEach(i -> {
             String url = toDownload.get(i);
@@ -62,47 +63,24 @@ public class WebCrawler implements Crawler {
                         extractors.submit(() -> {
                             try {
                                 toDownloadNext.addAll(document.extractLinks());
-                                waitFor.ready(i);
                             } catch (IOException e) {
                                 errors.put(url, e);
-                                waitFor.ready(i);
                             }
+                            waitFor.countDown();
                         });
+                    } else {
+                        waitFor.countDown();
                     }
                 } catch (IOException e) {
                     errors.put(url, e);
-                    waitFor.ready(i);
                 }
             });
         });
 
         try {
-            waitFor.waitUntilReady();
+            waitFor.await();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
-        }
-    }
-}
-
-class ReadyToReturn {
-    private final List<Boolean> ready;
-
-    public ReadyToReturn(int n) {
-        ready = new ArrayList<>(Collections.nCopies(n, false));
-    }
-
-    public synchronized void waitUntilReady() throws InterruptedException {
-        while (!ready.stream().allMatch(Boolean::booleanValue)) {
-            wait();
-        }
-    }
-
-    public void ready(int n) {
-        ready.set(n, true);
-        if (ready.stream().allMatch(Boolean::booleanValue)) {
-            synchronized (this) {
-                notify();
-            }
         }
     }
 }
