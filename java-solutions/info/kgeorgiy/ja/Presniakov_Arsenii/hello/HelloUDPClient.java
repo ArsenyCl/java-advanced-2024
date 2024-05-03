@@ -15,6 +15,14 @@ import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
 
 public class HelloUDPClient implements HelloClient {
+    /**
+     * Main class for {@link HelloUDPClient}.
+     * <p>
+     * The first argument is host of server, the second argument is port of server,
+     * the third argument is prefix to send on the server, the fourth argument is number of working threads and the
+     * fifth argument is number of requests for each thread
+     * @param args an array of arguments
+     */
     public static void main(String[] args) {
         if (args == null || args.length != 5 || Arrays.stream(args).anyMatch(Objects::isNull)) {
             System.err.println("Arguments are incorrect!");
@@ -43,7 +51,7 @@ public class HelloUDPClient implements HelloClient {
             runRequests.submit(() -> {
                 try (DatagramSocket socket = new DatagramSocket()) {
                     socket.connect(socketAddress);
-                    socket.setSoTimeout(250);
+                    socket.setSoTimeout(500);
                     DatagramPacket serverResponse = SocketUtils.createPacket(socket);
                     for (int request = 1; request <= requests; request++) {
                         String toSend = String.format("%s%d_%d", prefix, thread, request);
@@ -59,7 +67,6 @@ public class HelloUDPClient implements HelloClient {
                             String response = SocketUtils.getString(serverResponse);
                             if (response.contains(toSend)) {
                                 System.out.println(response);
-                                latch.countDown();
                                 break;
                             }
                         }
@@ -67,6 +74,8 @@ public class HelloUDPClient implements HelloClient {
 
                 } catch (SocketException e) {
                     System.err.println("Socket exception in runClient: " + e.getMessage());
+                } finally {
+                    latch.countDown();
                 }
             });
         });

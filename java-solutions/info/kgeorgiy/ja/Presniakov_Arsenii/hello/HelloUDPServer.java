@@ -8,7 +8,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketAddress;
 import java.net.SocketException;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -77,6 +76,12 @@ public class HelloUDPServer implements NewHelloServer {
         }
     }
 
+    /**
+     * Main class for {@link HelloUDPServer}.
+     * <p>
+     * The first argument is port of the server, the second argument is number of worker threads
+     * @param args an array of arguments
+     */
 
 
     public static void main(String[] args) {
