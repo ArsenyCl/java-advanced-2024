@@ -1,5 +1,6 @@
 package info.kgeorgiy.ja.Presniakov_Arsenii.hello;
 
+import info.kgeorgiy.ja.Presniakov_Arsenii.implementor.Implementor;
 import info.kgeorgiy.java.advanced.hello.HelloServer;
 import info.kgeorgiy.java.advanced.hello.NewHelloServer;
 
@@ -8,6 +9,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketAddress;
 import java.net.SocketException;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -76,8 +78,9 @@ public class HelloUDPServer implements NewHelloServer {
         }
     }
 
+
+
     public static void main(String[] args) {
-        System.out.println("$$".replaceAll("\\$", "abc"));
         if (args == null || args.length != 2 || Arrays.stream(args).anyMatch(Objects::isNull)) {
             System.err.println("Arguments are incorrect!");
             return;
