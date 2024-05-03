@@ -1,6 +1,5 @@
 package info.kgeorgiy.ja.Presniakov_Arsenii.hello;
 
-import info.kgeorgiy.ja.Presniakov_Arsenii.implementor.Implementor;
 import info.kgeorgiy.java.advanced.hello.HelloServer;
 import info.kgeorgiy.java.advanced.hello.NewHelloServer;
 
