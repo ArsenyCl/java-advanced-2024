@@ -20,6 +20,9 @@ public class HelloUDPServer implements NewHelloServer {
 
     @Override
     public void start(int threads, Map<Integer, String> ports) {
+        if (Objects.isNull(ports) || ports.isEmpty()) {
+            return;
+        }
         handleClients = Executors.newFixedThreadPool(threads);
         handleConnections = Executors.newFixedThreadPool(ports.size());
         List<Integer> portNumbers = new ArrayList<>(ports.keySet());
@@ -53,9 +56,16 @@ public class HelloUDPServer implements NewHelloServer {
 
     @Override
     public void close() {
-        Arrays.stream(sockets).forEach(DatagramSocket::close);;
-        handleConnections.shutdownNow();
-        handleClients.shutdownNow();
+        if (Objects.nonNull(sockets)) {
+            Arrays.stream(sockets).filter(Objects::nonNull).forEach(DatagramSocket::close);
+        }
+        if (Objects.nonNull(handleConnections)) {
+            handleConnections.shutdownNow();
+        }
+
+        if (Objects.nonNull(handleClients)) {
+            handleClients.shutdownNow();
+        }
     }
 
     private void hello(String text, SocketAddress socketAddress, int socketNum) {

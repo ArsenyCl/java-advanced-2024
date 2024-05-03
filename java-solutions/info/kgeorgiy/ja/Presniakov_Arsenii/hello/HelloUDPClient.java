@@ -7,7 +7,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
@@ -34,6 +33,7 @@ public class HelloUDPClient implements HelloClient {
         }
     }
 
+    @Override
     public void run(String host, int port, String prefix, int threads, int requests) {
         InetSocketAddress socketAddress = new InetSocketAddress(host, port);
 
