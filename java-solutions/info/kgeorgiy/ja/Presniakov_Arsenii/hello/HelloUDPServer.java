@@ -37,7 +37,7 @@ public class HelloUDPServer implements NewHelloServer {
                             DatagramPacket packet = SocketUtils.createPacket(socket);
                             socket.receive(packet);
                             handleClients.submit(() -> {
-                                hello(String.format(ports.get(port), SocketUtils.getString(packet)), packet.getSocketAddress(), socket);
+                                hello(ports.get(port).replaceAll("\\$", SocketUtils.getString(packet)), packet.getSocketAddress(), socket);
                             });
                         } catch (SocketException e) {
                             System.err.println("Socket exception in run: " + e.getMessage());
