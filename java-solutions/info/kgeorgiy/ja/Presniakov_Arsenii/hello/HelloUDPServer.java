@@ -16,7 +16,7 @@ public class HelloUDPServer implements NewHelloServer {
 
     private ExecutorService handleClients;
     private ExecutorService handleConnections;
-    private DatagramSocket[] sockets;
+    private List<DatagramSocket> sockets;
 
     @Override
     public void start(int threads, Map<Integer, String> ports) {
@@ -25,21 +25,19 @@ public class HelloUDPServer implements NewHelloServer {
         }
         handleClients = Executors.newFixedThreadPool(threads);
         handleConnections = Executors.newFixedThreadPool(ports.size());
-        List<Integer> portNumbers = new ArrayList<>(ports.keySet());
-        sockets = new DatagramSocket[ports.size()];
-        for (int i = 0; i < ports.size(); i++) {
-            int finalI = i;
-            int port = portNumbers.get(i);
+        sockets = new ArrayList<>(ports.size());
+        for (int port : ports.keySet()) {
             try {
-                sockets[i] = new DatagramSocket(port);
-                DatagramSocket socket = sockets[i];
+
+                DatagramSocket socket = new DatagramSocket(port);
+                sockets.add(socket);
                 handleConnections.submit(() -> {
                     while (!Thread.interrupted() && !socket.isClosed()) {
                         try {
                             DatagramPacket packet = SocketUtils.createPacket(socket);
                             socket.receive(packet);
                             handleClients.submit(() -> {
-                                hello(ports.get(port).replaceAll("\\$", SocketUtils.getString(packet)), packet.getSocketAddress(), finalI);
+                                hello(ports.get(port).replaceAll("\\$", SocketUtils.getString(packet)), packet.getSocketAddress(), socket);
                             });
                         } catch (SocketException e) {
                             System.err.println("Socket exception in run: " + e.getMessage());
@@ -57,7 +55,7 @@ public class HelloUDPServer implements NewHelloServer {
     @Override
     public void close() {
         if (Objects.nonNull(sockets)) {
-            Arrays.stream(sockets).filter(Objects::nonNull).forEach(DatagramSocket::close);
+            sockets.stream().forEach(DatagramSocket::close);
         }
         if (Objects.nonNull(handleConnections)) {
             handleConnections.shutdownNow();
@@ -68,11 +66,11 @@ public class HelloUDPServer implements NewHelloServer {
         }
     }
 
-    private void hello(String text, SocketAddress socketAddress, int socketNum) {
+    private void hello(String text, SocketAddress socketAddress, DatagramSocket socket) {
         DatagramPacket packet = SocketUtils.getPacket(text);
         packet.setSocketAddress(socketAddress);
         try {
-            sockets[socketNum].send(packet);
+            socket.send(packet);
         } catch (IOException e) {
             System.err.println("IO exception in hello: " + e.getMessage());
         }
