@@ -21,6 +21,7 @@ public class HelloUDPClient implements HelloClient {
      * The first argument is host of server, the second argument is port of server,
      * the third argument is prefix to send on the server, the fourth argument is number of working threads and the
      * fifth argument is number of requests for each thread
+     *
      * @param args an array of arguments
      */
     public static void main(String[] args) {
@@ -47,7 +48,7 @@ public class HelloUDPClient implements HelloClient {
 
         ExecutorService runRequests = Executors.newFixedThreadPool(threads);
         CountDownLatch latch = new CountDownLatch(threads);
-        IntStream.range(1, threads+1).forEach(thread -> {
+        IntStream.range(1, threads + 1).forEach(thread -> {
             runRequests.submit(() -> {
                 try (DatagramSocket socket = new DatagramSocket()) {
                     socket.connect(socketAddress);
@@ -85,5 +86,7 @@ public class HelloUDPClient implements HelloClient {
         }
 
         runRequests.shutdownNow();
+        runRequests.shutdown();
+
     }
 }
