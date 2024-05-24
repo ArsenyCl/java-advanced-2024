@@ -1,7 +1,5 @@
 package info.kgeorgiy.ja.Presniakov_Arsenii.hello;
 
-import info.kgeorgiy.java.advanced.hello.HelloServer;
-import info.kgeorgiy.java.advanced.hello.NewHelloServer;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -12,17 +10,22 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class HelloUDPServer implements NewHelloServer {
+public class HelloUDPServer extends AbstractHelloUDPServer {
 
     private ExecutorService handleClients;
     private ExecutorService handleConnections;
     private List<DatagramSocket> sockets;
 
+
+    public static void main(String[] args) {
+        mainFunction(new HelloUDPServer(), args);
+    }
     @Override
     public void start(int threads, Map<Integer, String> ports) {
         if (Objects.isNull(ports) || ports.isEmpty()) {
             return;
         }
+        this.ports = ports;
         handleClients = Executors.newFixedThreadPool(threads);
         handleConnections = Executors.newFixedThreadPool(ports.size());
         sockets = new ArrayList<>(ports.size());
@@ -37,7 +40,7 @@ public class HelloUDPServer implements NewHelloServer {
                             DatagramPacket packet = SocketUtils.createPacket(socket);
                             socket.receive(packet);
                             handleClients.submit(() -> {
-                                hello(ports.get(port).replaceAll("\\$", SocketUtils.getString(packet)), packet.getSocketAddress(), socket);
+                                hello(createText(port, SocketUtils.getString(packet)) , packet.getSocketAddress(), socket);
                             });
                         } catch (SocketException e) {
                             System.err.println("Socket exception in run: " + e.getMessage());
@@ -73,29 +76,6 @@ public class HelloUDPServer implements NewHelloServer {
             socket.send(packet);
         } catch (IOException e) {
             System.err.println("IO exception in hello: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Main class for {@link HelloUDPServer}.
-     * <p>
-     * The first argument is port of the server, the second argument is number of worker threads
-     * @param args an array of arguments
-     */
-
-
-    public static void main(String[] args) {
-        if (args == null || args.length != 2 || Arrays.stream(args).anyMatch(Objects::isNull)) {
-            System.err.println("Arguments are incorrect!");
-            return;
-        }
-        try(HelloServer server = new HelloUDPServer()) {
-            int port = Integer.parseInt(args[0]);
-            int threads = Integer.parseInt(args[1]);
-
-            server.start(port, threads);
-        } catch (NumberFormatException e) {
-            System.err.println("Arguments must be integers! " + e.getMessage());
         }
     }
 }
