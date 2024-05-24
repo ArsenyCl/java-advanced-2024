@@ -2,7 +2,6 @@ package info.kgeorgiy.ja.Presniakov_Arsenii.bank;
 import info.kgeorgiy.ja.Presniakov_Arsenii.bank.account.Account;
 import info.kgeorgiy.ja.Presniakov_Arsenii.bank.bank.Bank;
 import info.kgeorgiy.ja.Presniakov_Arsenii.bank.bank.RemoteBank;
-import info.kgeorgiy.ja.Presniakov_Arsenii.bank.person.LocalPerson;
 import info.kgeorgiy.ja.Presniakov_Arsenii.bank.person.Person;
 import org.junit.jupiter.api.*;
 
