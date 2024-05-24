@@ -67,7 +67,7 @@ public class HelloUDPNonblockingServer extends AbstractHelloUDPServer {
         });
     }
 
-
+    @SuppressWarnings("unchecked")
     private void request(SelectionKey key) {
         if (!key.isValid()) {
             return;
