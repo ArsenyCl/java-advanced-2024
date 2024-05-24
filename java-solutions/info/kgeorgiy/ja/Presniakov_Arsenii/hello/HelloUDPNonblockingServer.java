@@ -67,12 +67,18 @@ public class HelloUDPNonblockingServer extends AbstractHelloUDPServer {
         });
     }
 
+
     private void request(SelectionKey key) {
         if (!key.isValid()) {
             return;
         }
 
+        if (Objects.isNull(key.attachment())) {
+            return;
+        }
+
         Queue<ServerResponse> KeyResponseQueue = (ConcurrentLinkedQueue<ServerResponse>) key.attachment();
+
         try {
             DatagramChannel channel = (DatagramChannel) key.channel();
             if (key.isWritable()) {

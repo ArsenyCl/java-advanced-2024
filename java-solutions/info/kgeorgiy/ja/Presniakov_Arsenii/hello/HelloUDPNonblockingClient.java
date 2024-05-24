@@ -1,7 +1,5 @@
 package info.kgeorgiy.ja.Presniakov_Arsenii.hello;
 
-import info.kgeorgiy.java.advanced.hello.HelloClient;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.InetSocketAddress;
@@ -72,6 +70,10 @@ public class HelloUDPNonblockingClient extends AbstractHelloUDPClient {
                 }, 200) == 0) {
                     selector.keys().stream().forEach(key -> key.interestOps(SelectionKey.OP_WRITE));
                 }
+            }
+
+            for (DatagramChannel channel : channels) {
+                channel.close();
             }
 
         } catch (IOException | UncheckedIOException e) {
