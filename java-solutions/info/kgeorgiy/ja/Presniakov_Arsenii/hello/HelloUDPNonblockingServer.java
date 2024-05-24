@@ -46,7 +46,7 @@ public class HelloUDPNonblockingServer extends AbstractHelloUDPServer {
                 channels.add(channel);
                 channel.configureBlocking(false);
                 channel.bind(new InetSocketAddress(port));
-                channel.register(selector, SelectionKey.OP_READ, new ConcurrentLinkedQueue<ServerResponse>());
+                channel.register(selector, SelectionKey.OP_READ, new UncheckedCastFighter());
                 maxSize = Math.max(maxSize, channel.socket().getReceiveBufferSize());
             }
             buffer = ByteBuffer.allocateDirect(maxSize);
@@ -67,7 +67,6 @@ public class HelloUDPNonblockingServer extends AbstractHelloUDPServer {
         });
     }
 
-    @SuppressWarnings("unchecked")
     private void request(SelectionKey key) {
         if (!key.isValid()) {
             return;
@@ -77,7 +76,7 @@ public class HelloUDPNonblockingServer extends AbstractHelloUDPServer {
             return;
         }
 
-        Queue<ServerResponse> KeyResponseQueue = (ConcurrentLinkedQueue<ServerResponse>) key.attachment();
+        Queue<ServerResponse> KeyResponseQueue = ((UncheckedCastFighter) key.attachment()).responseQueue;
 
         try {
             DatagramChannel channel = (DatagramChannel) key.channel();
@@ -149,6 +148,10 @@ public class HelloUDPNonblockingServer extends AbstractHelloUDPServer {
             this.message = message;
             this.address = address;
         }
+    }
+
+    private static class UncheckedCastFighter {
+        public final Queue<ServerResponse> responseQueue = new ConcurrentLinkedQueue<>();
     }
 
 }
