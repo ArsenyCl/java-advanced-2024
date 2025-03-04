@@ -7,7 +7,12 @@
     * `git clone https://www.kgeorgiy.info/git-students/year2022/<USER>/java-advanced`
     * У личных репозиториев __нет__ web-интерфейса, используйте инструменты командной строки.
  * Добавьте ссылку на исходный репозиторий
-    * `git remote add source https://www.kgeorgiy.info/git/geo/java-advanced-2024-solutions`
+    * `git remote add source https://www.kgeorgiy.info/git/geo/java-advanced-2024
+    *
+    *
+    *
+    *
+    * -solutions`
     * Теперь можно будет забирать обновления командой `git pull source master`.
  * Переименуйте пакет `info.kgeorgiy.ja.__last_name__`, заменив
 
